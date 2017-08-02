@@ -114,7 +114,7 @@ static inline int kstack_end(void *addr)
 	/* Reliable end of stack detection:
 	 * Some APM bios versions misalign the stack
 	 */
-	return !(((unsigned long)addr+sizeof(void*)-1) & (THREAD_SIZE-sizeof(void*)));
+	return !(((unsigned long)addr+sizeof(void*)-1) & (THREAD_SIZE-sizeof(void*))); /* 用于判断给定地址是否位于栈的有效地址 */
 }
 #endif
 

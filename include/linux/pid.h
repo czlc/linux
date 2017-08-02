@@ -3,7 +3,7 @@
 
 #include <linux/rculist.h>
 
-/* 注意，不包括TGID(线程组Id)，因为它仅仅是线程组长ID而已 */
+/* 注意，不包括TGID(线程组Id)，因为它仅仅是线程组长PID而已 */
 enum pid_type
 {
 	PIDTYPE_PID,
@@ -46,27 +46,31 @@ enum pid_type
  * struct upid is used to get the id of the struct pid, as it is
  * seen in particular namespace. Later the struct pid is found with
  * find_pid_ns() using the int nr and struct pid_namespace *ns.
+ *
+ * 在特定namespace中看到的信息
  */
 
 struct upid {
 	/* Try to keep pid_chain in the same cacheline as nr for find_vpid */
 	int nr;	/* 数字id */
-	struct pid_namespace *ns; /* 数字id对应的namespace */
-	struct hlist_node pid_chain;
+	struct pid_namespace *ns; /* 数字id所属的namespace */
+	struct hlist_node pid_chain;	/* 用于挂接到外部的hash over flow list*/
 };
 
+/* 内核内部表示一个PID的结构 */
 struct pid
 {
 	atomic_t count;
 	unsigned int level; /* 可以看到该process的namespace命名空间数目，即它的深度 */
 	/* lists of tasks that use this pid */
-	struct hlist_head tasks[PIDTYPE_MAX];	/* 多个task_struct可以共享一个Id(比如PGID)，就是链在这里 */
+	struct hlist_head tasks[PIDTYPE_MAX];	/* 多个task_struct可以共享一个pdi(比如PGID)，就是链在这里 */
 	struct rcu_head rcu;
-	struct upid numbers[1];	/* 每个数组项对应一个命名空间 */
+	struct upid numbers[1];	/* 此pid对应的各个namespace，每个数组项对应一个命名空间 */
 };
 
 extern struct pid init_struct_pid;
 
+/* 用于将task_struct连接到struct pid */
 struct pid_link
 {
 	struct hlist_node node;

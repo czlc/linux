@@ -65,11 +65,11 @@ struct task_group;
  */
 
 /* Used in tsk->state: */
-#define TASK_RUNNING			0
-#define TASK_INTERRUPTIBLE		1
-#define TASK_UNINTERRUPTIBLE		2
-#define __TASK_STOPPED			4
-#define __TASK_TRACED			8
+#define TASK_RUNNING			0	/* 可运行状态 */
+#define TASK_INTERRUPTIBLE		1	/* 睡眠状态 */
+#define TASK_UNINTERRUPTIBLE		2	/* 因内核指示而停用的睡眠进程，只能由内核亲自唤醒 */
+#define __TASK_STOPPED			4	/* 表示进程特意停止运行，比如调试器暂停 */
+#define __TASK_TRACED			8	/* 使用ptrace调试的进程 */
 /* Used in tsk->exit_state: */
 #define EXIT_DEAD			16
 #define EXIT_ZOMBIE			32
@@ -516,6 +516,15 @@ struct wake_q_node {
 	struct wake_q_node *next;
 };
 
+/*
+ * 1. 状态和执行信息
+ * 2. 有关已经分配的虚拟内存相关信息
+ * 3. 进程身份凭据
+ * 4. elf文件，以及其他文件系统信息
+ * 5. 线程
+ * 6. 进程间通信相关信息
+ * 7. 该进程所用的信号处理程序
+ */
 struct task_struct {
 #ifdef CONFIG_THREAD_INFO_IN_TASK
 	/*
@@ -684,8 +693,8 @@ struct task_struct {
 
 	struct restart_block		restart_block;
 
-	pid_t				pid;
-	pid_t				tgid;	/* 线程组id thread group id */
+	pid_t				pid;	/* global 的 */
+	pid_t				tgid;	/* 线程组id thread group id, global */
 
 #ifdef CONFIG_CC_STACKPROTECTOR
 	/* Canary value for the -fstack-protector GCC feature: */
@@ -697,7 +706,7 @@ struct task_struct {
 	 * p->real_parent->pid)
 	 */
 
-	/* Real parent process: */
+	/* Real parent process: 在被调试的情况下 */
 	struct task_struct __rcu	*real_parent;
 
 	/* Recipient of SIGCHLD, wait4() reports: */
@@ -706,8 +715,8 @@ struct task_struct {
 	/*
 	 * Children/sibling form the list of natural children:
 	 */
-	struct list_head		children;
-	struct list_head		sibling;
+	struct list_head		children;		/* 子进程列表 */
+	struct list_head		sibling;		/* 同父进程的兄弟进程 */
 	struct task_struct		*group_leader;	/* 指向process group的主线程 */
 
 	/*

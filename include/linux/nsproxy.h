@@ -29,10 +29,10 @@ struct fs_struct;
  */
 struct nsproxy {
 	atomic_t count;
-	struct uts_namespace *uts_ns;
+	struct uts_namespace *uts_ns;	/* UNIX Timesharing System */
 	struct ipc_namespace *ipc_ns;	/* 进程间通信 */
 	struct mnt_namespace *mnt_ns;	/* 挂接的文件系统 */
-	struct pid_namespace *pid_ns_for_children;
+	struct pid_namespace *pid_ns_for_children;	/* 进程标识 */
 	struct net 	     *net_ns;
 	struct cgroup_namespace *cgroup_ns;
 };

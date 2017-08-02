@@ -21,9 +21,10 @@ struct old_utsname {
 	char machine[65];
 };
 
+/* 通过uname命令可以查看 */
 struct new_utsname {
-	char sysname[__NEW_UTS_LEN + 1];
-	char nodename[__NEW_UTS_LEN + 1];
+	char sysname[__NEW_UTS_LEN + 1];		/* 系统名称 */
+	char nodename[__NEW_UTS_LEN + 1];		/* 机器名 */
 	char release[__NEW_UTS_LEN + 1];
 	char version[__NEW_UTS_LEN + 1];
 	char machine[__NEW_UTS_LEN + 1];

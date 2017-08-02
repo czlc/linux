@@ -39,9 +39,10 @@ struct	rusage {
 	__kernel_long_t	ru_nivcsw;	/* involuntary " */
 };
 
+/* 用于对进程使用系统资源加某些限制 */
 struct rlimit {
-	__kernel_ulong_t	rlim_cur;
-	__kernel_ulong_t	rlim_max;
+	__kernel_ulong_t	rlim_cur;	/* 当前资源限制，也称软限制 */
+	__kernel_ulong_t	rlim_max;	/* 该限制的最大容许值，也称硬限制 */
 };
 
 #define RLIM64_INFINITY		(~0ULL)

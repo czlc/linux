@@ -33,7 +33,7 @@ struct pid_namespace {
 	struct rcu_head rcu;
 	int last_pid;
 	unsigned int nr_hashed;
-	struct task_struct *child_reaper;
+	struct task_struct *child_reaper;	/* 每个pid namespace 的init进程 */
 	struct kmem_cache *pid_cachep;
 	unsigned int level;	/* 继承等级，表明上面有几层parent */
 	struct pid_namespace *parent;

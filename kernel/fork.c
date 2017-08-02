@@ -1509,7 +1509,7 @@ static inline void rcu_copy_process(struct task_struct *p)
  *
  * It copies the registers, and all the appropriate
  * parts of the process environment (as per the clone
- * flags). The actual kick-off is left to the caller.
+ * flags). The actual kick-off is left to the caller..
  */
 static __latent_entropy struct task_struct *copy_process(
 					unsigned long clone_flags,
@@ -1525,7 +1525,7 @@ static __latent_entropy struct task_struct *copy_process(
 	struct task_struct *p;
 
 	/* 
-	 * CLONE_NEWNS标志表示子进程需要自己的命名空间，而CLONE_FS则代表子进程共
+	 * CLONE_NEWNS标志表示子进程需要自己的MOUNT命名空间，而CLONE_FS则代表子进程共
 	 * 享父进程的根目录和当前工作目录，两者不可兼容。
 	 */
 	if ((clone_flags & (CLONE_NEWNS|CLONE_FS)) == (CLONE_NEWNS|CLONE_FS))
@@ -2018,7 +2018,7 @@ long _do_fork(unsigned long clone_flags,
 {
 	struct task_struct *p;
 	int trace = 0;
-	long nr;
+	long nr;	/* PID或者error code */
 
 	/*
 	 * Determine whether and which event to report to ptracer.  When
@@ -2063,6 +2063,7 @@ long _do_fork(unsigned long clone_flags,
 			get_task_struct(p);
 		}
 
+		/* 将task_struct 添加到调度器队列 */
 		wake_up_new_task(p);
 
 		/* forking complete and child started to run, tell ptracer */

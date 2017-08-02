@@ -185,6 +185,7 @@ struct list_head {
 	struct list_head *next, *prev;
 };
 
+/* 内核标准数据结构，用于建立双链散列表 */
 struct hlist_head {
 	struct hlist_node *first;
 };
