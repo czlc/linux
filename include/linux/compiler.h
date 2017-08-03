@@ -563,7 +563,7 @@ static __always_inline void __write_once_size(volatile void *p, void *res, int s
 #define __ACCESS_ONCE(x) ({ \
 	 __maybe_unused typeof(x) __var = (__force typeof(x)) 0; \
 	(volatile typeof(x) *)&(x); })
-#define ACCESS_ONCE(x) (*__ACCESS_ONCE(x))
+#define ACCESS_ONCE(x) (*__ACCESS_ONCE(x))	/* ¼û https://lwn.net/Articles/508991/ */
 
 /**
  * lockless_dereference() - safely load a pointer for later dereference

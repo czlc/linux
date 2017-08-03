@@ -531,12 +531,12 @@ struct task_struct {
 	 * For reasons of header soup (see current_thread_info()), this
 	 * must be the first element of task_struct.
 	 */
-	struct thread_info		thread_info;
+	struct thread_info		thread_info;	/* 体系结构相关的信息 */
 #endif
 	/* -1 unrunnable, 0 runnable, >0 stopped: */
 	volatile long			state;
 	
-	/* 内核栈 */
+	/* 内核栈，大小固定 */
 	void				*stack;
 	
 	/* (REM)
@@ -568,13 +568,12 @@ struct task_struct {
 	 * a lock when context switching and wanting to have interrupts 
 	 * enabled during a context switch in order to avoid high latency
 	 * by having an unlocked runqueue. Basically when it's 0 then the
-	 * task can be moved to a different cpu.而process运行的cpu保存在
-	 * thread_info
+	 * task can be moved to a different cpu.
 	 */
 	int				on_cpu;
 #ifdef CONFIG_THREAD_INFO_IN_TASK
 	/* Current CPU: */
-	unsigned int			cpu;
+	unsigned int			cpu;	/* 运行在哪个cpu */
 #endif
 	unsigned int			wakee_flips;
 	unsigned long			wakee_flip_decay_ts;
@@ -582,13 +581,22 @@ struct task_struct {
 
 	int				wake_cpu;
 #endif
+	/*
+	 * (REM)
+	 * Linux support separate run-queue for each CPU in the system. Task 
+	 * or task_struct could be in run-queue. Also task_struct could migrate
+	 * beatween cpu's. p->on_rq indicate that task_struct is in a process 
+	 * of migrating between two run-queues. if p->on_rq == TASK_ON_RQ_MIGRATING
+	 * task is migrating and other sheduler with this task cannot work it
+	 * should busy wait. After it set to TASK_ON_RQ_QUEUED.
+	*/
 	int				on_rq;
 
-	/* 优先级*/
-	int				prio;
-	int				static_prio;	/* 静态优先级在进程启动的分配，可以同nice和sched_setscheduler修改 */
-	int				normal_prio;
-	unsigned int			rt_priority;
+	/* 优先级相关 */
+	int				prio;			/* 动态优先级*/
+	int				static_prio;	/* 静态优先级：在进程启动的分配，可以同nice和sched_setscheduler修改 */
+	int				normal_prio;	/* 普通优先级：MAX_RT_PRIO到MAX_PRIO-1（即100到139）。值越大静态优先级越低。 */
+	unsigned int			rt_priority;	/* 实时优先级： 范围是0到MAX_RT_PRIO-1 */
 
 	const struct sched_class	*sched_class;
 	struct sched_entity		se;
@@ -698,7 +706,7 @@ struct task_struct {
 
 #ifdef CONFIG_CC_STACKPROTECTOR
 	/* Canary value for the -fstack-protector GCC feature: */
-	unsigned long			stack_canary;
+	unsigned long			stack_canary;	/* http://abcdxyzk.github.io/blog/2015/11/17/debug-CC_STACKPROTECTOR/ */
 #endif
 	/*
 	 * Pointers to the (original) parent process, youngest child, younger sibling,
