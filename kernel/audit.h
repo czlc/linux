@@ -106,6 +106,7 @@ struct audit_proctitle {
 	char	*value;	/* the cmdline field */
 };
 
+/* 《Linux安全体系分析与编程》*/
 /* The per-task audit context. */
 struct audit_context {
 	int		    dummy;	/* must be the first element */

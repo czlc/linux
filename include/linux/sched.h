@@ -749,13 +749,13 @@ struct task_struct {
 	/* CLONE_CHILD_CLEARTID: */
 	int __user			*clear_child_tid;
 
-	u64				utime;
-	u64				stime;
+	u64				utime;	/* 进程在用户态经过的节拍数*/
+	u64				stime;	/* 进程在内核态经过的节拍数*/
 #ifdef CONFIG_ARCH_HAS_SCALED_CPUTIME
 	u64				utimescaled;
 	u64				stimescaled;
 #endif
-	u64				gtime;
+	u64				gtime;	/* 以节拍计数的虚拟机运行时间（guest time）*/
 	struct prev_cputime		prev_cputime;
 #ifdef CONFIG_VIRT_CPU_ACCOUNTING_GEN
 	struct vtime			vtime;
@@ -765,16 +765,16 @@ struct task_struct {
 	atomic_t			tick_dep_mask;
 #endif
 	/* Context switch counts: */
-	unsigned long			nvcsw;
-	unsigned long			nivcsw;
+	unsigned long			nvcsw;	/* 自愿（voluntary）下文切换计数 */
+	unsigned long			nivcsw;	/* 非自愿（involuntary）上下文切换计数 */
 
 	/* Monotonic time in nsecs: */
 	u64				start_time;
 
-	/* Boot based time in nsecs: */
+	/* Boot based time in nsecs: 包含了进程睡眠时间 */
 	u64				real_start_time;
 
-	/* MM fault and swap info: this can arguably be seen as either mm-specific or thread-specific: */
+	/* MM fault and swap info: this can arguably be seen as either mm-specific or thread-specific: 缺页统计 */
 	unsigned long			min_flt;
 	unsigned long			maj_flt;
 
@@ -788,10 +788,10 @@ struct task_struct {
 	/* Tracer's credentials at attach: */
 	const struct cred __rcu		*ptracer_cred;
 
-	/* Objective and real subjective task credentials (COW): */
+	/* Objective and real subjective task credentials (COW): task是属于哪一个用户(哪一个组)*/
 	const struct cred __rcu		*real_cred;
 
-	/* Effective (overridable) subjective task credentials (COW): */
+	/* Effective (overridable) subjective task credentials (COW): 做权限判断的时候用到 */
 	const struct cred __rcu		*cred;
 
 	/*
@@ -806,16 +806,16 @@ struct task_struct {
 	struct nameidata		*nameidata;
 
 #ifdef CONFIG_SYSVIPC
-	struct sysv_sem			sysvsem;
-	struct sysv_shm			sysvshm;
+	struct sysv_sem			sysvsem;	/* 信号量方式通信 */
+	struct sysv_shm			sysvshm;	/* 共享内存方式通信 */
 #endif
 #ifdef CONFIG_DETECT_HUNG_TASK
-	unsigned long			last_switch_count;
+	unsigned long			last_switch_count;	/* nvcsw和nivcsw的总和 */
 #endif
-	/* Filesystem information: */
+	/* Filesystem information: 用来表示进程与文件系统的联系，包括当前目录和根目录*/
 	struct fs_struct		*fs;
 
-	/* Open file information: */
+	/* Open file information: 表示进程当前打开的文件 */
 	struct files_struct		*files;
 
 	/* Namespaces: */
@@ -833,14 +833,14 @@ struct task_struct {
 	size_t				sas_ss_size;
 	unsigned int			sas_ss_flags;
 
-	struct callback_head		*task_works;
+	struct callback_head		*task_works;	/* http://www.cnblogs.com/lailailai/p/4510982.html */
 
-	struct audit_context		*audit_context;
+	struct audit_context		*audit_context;	/* http://chuansong.me/n/828670251344 */
 #ifdef CONFIG_AUDITSYSCALL
 	kuid_t				loginuid;
 	unsigned int			sessionid;
 #endif
-	struct seccomp			seccomp;
+	struct seccomp			seccomp;	/* https://lwn.net/Articles/656307/ */
 
 	/* Thread group tracking: */
 	u32				parent_exec_id;
@@ -854,6 +854,7 @@ struct task_struct {
 
 	struct wake_q_node		wake_q;
 
+	/* https://lwn.net/Articles/178253/ */
 #ifdef CONFIG_RT_MUTEXES
 	/* PI waiters blocked on a rt_mutex held by this task: */
 	struct rb_root			pi_waiters;
@@ -910,20 +911,20 @@ struct task_struct {
 #endif
 
 	/* VM state: */
-	struct reclaim_state		*reclaim_state;
+	struct reclaim_state		*reclaim_state;	/* 虚拟内存回收用到的状态？ */
 
-	struct backing_dev_info		*backing_dev_info;
+	struct backing_dev_info		*backing_dev_info; /* http://blog.csdn.net/myarrow/article/details/8918944 */
 
-	struct io_context		*io_context;
+	struct io_context		*io_context;	/* I/O调度器所使用的信息 */
 
 	/* Ptrace state: */
 	unsigned long			ptrace_message;
 	siginfo_t			*last_siginfo;
 
-	struct task_io_accounting	ioac;
+	struct task_io_accounting	ioac;	/* 统计io */
 #ifdef CONFIG_TASK_XACCT
 	/* Accumulated RSS usage: */
-	u64				acct_rss_mem1;
+	u64				acct_rss_mem1;	/* https://en.wikipedia.org/wiki/Resident_set_size */
 	/* Accumulated virtual memory usage: */
 	u64				acct_vm_mem1;
 	/* stime + utime since last update: */
@@ -947,7 +948,7 @@ struct task_struct {
 	int				closid;
 #endif
 #ifdef CONFIG_FUTEX
-	struct robust_list_head __user	*robust_list;
+	struct robust_list_head __user	*robust_list;	/* https://lwn.net/Articles/172149/ */
 #ifdef CONFIG_COMPAT
 	struct compat_robust_list_head __user *compat_robust_list;
 #endif
