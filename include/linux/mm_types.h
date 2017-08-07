@@ -36,8 +36,6 @@ struct mem_cgroup;
  * of struct page. That is currently only used by slub but the arrangement
  * allows the use of atomic double word operations on the flags/mapping
  * and lru list pointers also.
- *
- * 这个结构在于描述物理内存本身，而不是描述其中的内容
  */
 struct page {
 	/* First double word block */

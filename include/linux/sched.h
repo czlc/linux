@@ -963,6 +963,8 @@ struct task_struct {
 #ifdef CONFIG_DEBUG_PREEMPT
 	unsigned long			preempt_disable_ip;
 #endif
+	/* http://whatis.techtarget.com/definition/NUMA-non-uniform-memory-access */
+	/* http://cenalulu.github.io/linux/numa/ */
 #ifdef CONFIG_NUMA
 	/* Protected by alloc_lock: */
 	struct mempolicy		*mempolicy;
@@ -1014,7 +1016,7 @@ struct task_struct {
 
 	struct tlbflush_unmap_batch	tlb_ubc;
 
-	struct rcu_head			rcu;
+	struct rcu_head			rcu;	/* https://lwn.net/Articles/262464/ */
 
 	/* Cache last used pipe for splice(): */
 	struct pipe_inode_info		*splice_pipe;
@@ -1046,6 +1048,12 @@ struct task_struct {
 	 * Time slack values; these are used to round up poll() and
 	 * select() etc timeout values. These are in nanoseconds.
 	 */
+	/*
+	hrtimer就是高精度定时器，精度是高，happy的同时也带来一个问题，那就是中断太多了，虽说中断是个好东西，但是有时候两个定时器相差几十个纳秒，
+	你完全没必要搞两个中断！
+	那么对于精度要求不高的情况，是不是可以降低硬件中断次数呀，
+	这个就是struct task_struct->timer_slack_ns的目的。通过timer_slack_ns来设置一个范围（range），在这个范围里面的hrtimer，我可以顺带一起处理了。
+	*/
 	u64				timer_slack_ns;
 	u64				default_timer_slack_ns;
 
@@ -1105,8 +1113,9 @@ struct task_struct {
 #endif
 
 #ifdef CONFIG_UPROBES
-	struct uprobe_task		*utask;
+	struct uprobe_task		*utask;	/* https://www.kernel.org/doc/Documentation/trace/uprobetracer.txt */
 #endif
+	/* https://bcache.evilpiepirate.org/ */
 #if defined(CONFIG_BCACHE) || defined(CONFIG_BCACHE_MODULE)
 	unsigned int			sequential_io;
 	unsigned int			sequential_io_avg;

@@ -252,6 +252,7 @@ struct lruvec {
 /* LRU Isolation modes. */
 typedef unsigned __bitwise isolate_mode_t;
 
+/* 应该叫水位标记，而不是水印 */
 enum zone_watermarks {
 	WMARK_MIN,
 	WMARK_LOW,
@@ -637,7 +638,7 @@ typedef struct pglist_data {
 	 */
 	spinlock_t node_size_lock;
 #endif
-	unsigned long node_start_pfn;
+	unsigned long node_start_pfn;	/* 该NUMA结点第一个页帧的逻辑编号*/
 	unsigned long node_present_pages; /* total number of physical pages */
 	unsigned long node_spanned_pages; /* total size of physical page
 					     range, including holes */
