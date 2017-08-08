@@ -5,6 +5,7 @@
 #include <linux/spinlock.h>
 #include <linux/seqlock.h>
 
+/* 进程相关的文件系统信息 */
 struct fs_struct {
 	int users;
 	spinlock_t lock;

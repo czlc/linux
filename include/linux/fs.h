@@ -1660,6 +1660,7 @@ struct block_device_operations;
 
 struct iov_iter;
 
+/* 针对特定文件的操作 */
 struct file_operations {
 	struct module *owner;
 	loff_t (*llseek) (struct file *, loff_t, int);
@@ -1700,6 +1701,7 @@ struct file_operations {
 			u64);
 };
 
+/* 针对文件的操作 */
 struct inode_operations {
 	struct dentry * (*lookup) (struct inode *,struct dentry *, unsigned int);
 	const char * (*get_link) (struct dentry *, struct inode *, struct delayed_call *);
@@ -1773,6 +1775,7 @@ extern int vfs_dedupe_file_range_compare(struct inode *src, loff_t srcoff,
 extern int vfs_dedupe_file_range(struct file *file,
 				 struct file_dedupe_range *same);
 
+/* 针对文件系统的操作 */
 struct super_operations {
    	struct inode *(*alloc_inode)(struct super_block *sb);
 	void (*destroy_inode)(struct inode *);

@@ -51,7 +51,7 @@ struct files_struct {
 	bool resize_in_progress;
 	wait_queue_head_t resize_wait;
 
-	struct fdtable __rcu *fdt;
+	struct fdtable __rcu *fdt;	/* 打开文件超过 NR_OPEN_DEFAULT 则挂接在这里 */
 	struct fdtable fdtab;
   /*
    * written part on a separate cache line in SMP
@@ -61,7 +61,7 @@ struct files_struct {
 	unsigned long close_on_exec_init[1];
 	unsigned long open_fds_init[1];
 	unsigned long full_fds_bits_init[1];
-	struct file __rcu * fd_array[NR_OPEN_DEFAULT];
+	struct file __rcu * fd_array[NR_OPEN_DEFAULT];	/* open file object list */
 };
 
 struct file_operations;

@@ -132,6 +132,7 @@ enum dentry_d_lock_class
 	DENTRY_D_LOCK_NESTED
 };
 
+/* 针对特定目录的操作 */
 struct dentry_operations {
 	int (*d_revalidate)(struct dentry *, unsigned int);
 	int (*d_weak_revalidate)(struct dentry *, unsigned int);

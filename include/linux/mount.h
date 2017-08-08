@@ -63,6 +63,7 @@ struct mnt_namespace;
 #define MNT_MARKED		0x4000000
 #define MNT_UMOUNT		0x8000000
 
+/* 一个文件系统实例 */
 struct vfsmount {
 	struct dentry *mnt_root;	/* root of the mounted tree */
 	struct super_block *mnt_sb;	/* pointer to superblock */
