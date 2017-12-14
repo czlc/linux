@@ -109,7 +109,7 @@ static inline void task_group_account_field(struct task_struct *p, int index,
 	 */
 	__this_cpu_add(kernel_cpustat.cpustat[index], tmp);
 
-	cpuacct_account_field(p, index, tmp);
+	cgroup_account_cputime_field(p, index, tmp);
 }
 
 /*
@@ -259,8 +259,7 @@ static inline u64 account_other_time(u64 max)
 {
 	u64 accounted;
 
-	/* Shall be converted to a lockdep-enabled lightweight check */
-	WARN_ON_ONCE(!irqs_disabled());
+	lockdep_assert_irqs_disabled();
 
 	accounted = steal_account_process_time(max);
 
@@ -447,6 +446,13 @@ void vtime_account_irq_enter(struct task_struct *tsk)
 EXPORT_SYMBOL_GPL(vtime_account_irq_enter);
 #endif /* __ARCH_HAS_VTIME_ACCOUNT */
 
+void cputime_adjust(struct task_cputime *curr, struct prev_cputime *prev,
+		    u64 *ut, u64 *st)
+{
+	*ut = curr->utime;
+	*st = curr->stime;
+}
+
 void task_cputime_adjusted(struct task_struct *p, u64 *ut, u64 *st)
 {
 	*ut = p->utime;
@@ -585,9 +591,8 @@ drop_precision:
  *
  * Assuming that rtime_i+1 >= rtime_i.
  */
-static void cputime_adjust(struct task_cputime *curr,
-			   struct prev_cputime *prev,
-			   u64 *ut, u64 *st)
+void cputime_adjust(struct task_cputime *curr, struct prev_cputime *prev,
+		    u64 *ut, u64 *st)
 {
 	u64 rtime, stime, utime;
 	unsigned long flags;
@@ -683,7 +688,7 @@ static u64 vtime_delta(struct vtime *vtime)
 {
 	unsigned long long clock;
 
-	clock = sched_clock_cpu(smp_processor_id());
+	clock = sched_clock();
 	if (clock < vtime->starttime)
 		return 0;
 
@@ -814,7 +819,7 @@ void arch_vtime_task_switch(struct task_struct *prev)
 
 	write_seqcount_begin(&vtime->seqcount);
 	vtime->state = VTIME_SYS;
-	vtime->starttime = sched_clock_cpu(smp_processor_id());
+	vtime->starttime = sched_clock();
 	write_seqcount_end(&vtime->seqcount);
 }
 
@@ -826,7 +831,7 @@ void vtime_init_idle(struct task_struct *t, int cpu)
 	local_irq_save(flags);
 	write_seqcount_begin(&vtime->seqcount);
 	vtime->state = VTIME_SYS;
-	vtime->starttime = sched_clock_cpu(cpu);
+	vtime->starttime = sched_clock();
 	write_seqcount_end(&vtime->seqcount);
 	local_irq_restore(flags);
 }

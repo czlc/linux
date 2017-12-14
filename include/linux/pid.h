@@ -1,15 +1,18 @@
+/* SPDX-License-Identifier: GPL-2.0 */
 #ifndef _LINUX_PID_H
 #define _LINUX_PID_H
 
 #include <linux/rculist.h>
 
-/* ×¢Òâ£¬²»°üÀ¨TGID(Ïß³Ì×éId)£¬ÒòÎªËü½ö½öÊÇÏß³Ì×é³¤PID¶øÒÑ */
+/* æ³¨æ„ï¼Œä¸åŒ…æ‹¬TGID(çº¿ç¨‹ç»„Id)ï¼Œå› ä¸ºå®ƒä»…ä»…æ˜¯çº¿ç¨‹ç»„é•¿PIDè€Œå·² */
 enum pid_type
 {
 	PIDTYPE_PID,
 	PIDTYPE_PGID,
 	PIDTYPE_SID,
-	PIDTYPE_MAX
+	PIDTYPE_MAX,
+	/* only valid to __task_pid_nr_ns() */
+	__PIDTYPE_TGID
 };
 
 /*
@@ -47,30 +50,28 @@ enum pid_type
  * seen in particular namespace. Later the struct pid is found with
  * find_pid_ns() using the int nr and struct pid_namespace *ns.
  *
- * ÔÚÌØ¶¨namespaceÖĞ¿´µ½µÄĞÅÏ¢
+ * åœ¨ç‰¹å®šnamespaceä¸­çœ‹åˆ°çš„ä¿¡æ¯
  */
 
 struct upid {
-	/* Try to keep pid_chain in the same cacheline as nr for find_vpid */
-	int nr;	/* Êı×Öid */
-	struct pid_namespace *ns; /* Êı×ÖidËùÊôµÄnamespace */
-	struct hlist_node pid_chain;	/* ÓÃÓÚ¹Ò½Óµ½Íâ²¿µÄhash over flow list*/
+	int nr;	/* æ•°å­—id */
+	struct pid_namespace *ns; /* æ•°å­—idæ‰€å±çš„namespace */
 };
 
-/* ÄÚºËÄÚ²¿±íÊ¾Ò»¸öPIDµÄ½á¹¹ */
+/* å†…æ ¸å†…éƒ¨è¡¨ç¤ºä¸€ä¸ªPIDçš„ç»“æ„ */
 struct pid
 {
 	atomic_t count;
-	unsigned int level; /* ¿ÉÒÔ¿´µ½¸ÃprocessµÄnamespaceÃüÃû¿Õ¼äÊıÄ¿£¬¼´ËüµÄÉî¶È */
+	unsigned int level; /* å¯ä»¥çœ‹åˆ°è¯¥processçš„namespaceå‘½åç©ºé—´æ•°ç›®ï¼Œå³å®ƒçš„æ·±åº¦ */
 	/* lists of tasks that use this pid */
-	struct hlist_head tasks[PIDTYPE_MAX];	/* ¶à¸ötask_struct¿ÉÒÔ¹²ÏíÒ»¸öpdi(±ÈÈçPGID)£¬¾ÍÊÇÁ´ÔÚÕâÀï */
+	struct hlist_head tasks[PIDTYPE_MAX];	/* å¤šä¸ªtask_structå¯ä»¥å…±äº«ä¸€ä¸ªpdi(æ¯”å¦‚PGID)ï¼Œå°±æ˜¯é“¾åœ¨è¿™é‡Œ */
 	struct rcu_head rcu;
-	struct upid numbers[1];	/* ´Ëpid¶ÔÓ¦µÄ¸÷¸önamespace£¬Ã¿¸öÊı×éÏî¶ÔÓ¦Ò»¸öÃüÃû¿Õ¼ä */
+	struct upid numbers[1];	/* æ­¤pidå¯¹åº”çš„å„ä¸ªnamespaceï¼Œæ¯ä¸ªæ•°ç»„é¡¹å¯¹åº”ä¸€ä¸ªå‘½åç©ºé—´ */
 };
 
 extern struct pid init_struct_pid;
 
-/* ÓÃÓÚ½«task_structÁ¬½Óµ½struct pid */
+/* ç”¨äºå°†task_structè¿æ¥åˆ°struct pid */
 struct pid_link
 {
 	struct hlist_node node;

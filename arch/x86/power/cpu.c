@@ -181,6 +181,7 @@ static void fix_processor_context(void)
 #endif
 	load_TR_desc();				/* This does ltr */
 	load_mm_ldt(current->active_mm);	/* This does lldt */
+	initialize_tlbstate_and_flush();
 
 	fpu__resume_cpu();
 
@@ -225,8 +226,20 @@ static void notrace __restore_processor_state(struct saved_context *ctxt)
 	load_idt((const struct desc_ptr *)&ctxt->idt_limit);
 #endif
 
+#ifdef CONFIG_X86_64
 	/*
-	 * segment registers
+	 * We need GSBASE restored before percpu access can work.
+	 * percpu access can happen in exception handlers or in complicated
+	 * helpers like load_gs_index().
+	 */
+	wrmsrl(MSR_GS_BASE, ctxt->gs_base);
+#endif
+
+	fix_processor_context();
+
+	/*
+	 * Restore segment registers.  This happens after restoring the GDT
+	 * and LDT, which happen in fix_processor_context().
 	 */
 #ifdef CONFIG_X86_32
 	loadsegment(es, ctxt->es);
@@ -247,12 +260,13 @@ static void notrace __restore_processor_state(struct saved_context *ctxt)
 	load_gs_index(ctxt->gs);
 	asm volatile ("movw %0, %%ss" :: "r" (ctxt->ss));
 
+	/*
+	 * Restore FSBASE and user GSBASE after reloading the respective
+	 * segment selectors.
+	 */
 	wrmsrl(MSR_FS_BASE, ctxt->fs_base);
-	wrmsrl(MSR_GS_BASE, ctxt->gs_base);
 	wrmsrl(MSR_KERNEL_GS_BASE, ctxt->gs_kernel_base);
 #endif
-
-	fix_processor_context();
 
 	do_fpu_end();
 	tsc_verify_tsc_adjust(true);
@@ -427,7 +441,7 @@ static int msr_initialize_bdw(const struct dmi_system_id *d)
 	return msr_init_context(bdw_msr_id, ARRAY_SIZE(bdw_msr_id));
 }
 
-static struct dmi_system_id msr_save_dmi_table[] = {
+static const struct dmi_system_id msr_save_dmi_table[] = {
 	{
 	 .callback = msr_initialize_bdw,
 	 .ident = "BROADWELL BDX_EP",
